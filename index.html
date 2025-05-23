@@ -3,21 +3,295 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Healthy Alternatives</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Healthy Food Swaps</title>
+  <style>
+    :root {
+      --bg: #f0f8f6;
+      --text: #333;
+      --card-bg: #fff;
+      --header-bg: linear-gradient(135deg, #8fd3f4, #84fab0);
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #e0e0e0;
+      --card-bg: #1e1e1e;
+      --header-bg: #1c6758;
+      --shadow: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 2rem;
+      text-align: center;
+      background: var(--header-bg);
+      color: white;
+    }
+
+    .controls {
+      margin-top: 1rem;
+    }
+
+    #search {
+      padding: 0.6rem;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    #toggle-theme {
+      margin-left: 1rem;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup.active {
+      display: flex;
+    }
+
+    .popup-content {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      color: var(--text);
+      position: relative;
+    }
+
+    #close-popup {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #e0f2f1;
+    }
+
+    @media (max-width: 768px) {
+      .card-content h3 {
+        font-size: 1.2rem;
+      }
+
+      #toggle-theme {
+        display: block;
+        margin: 1rem auto 0;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Healthy Food Swaps</h1>
-    <p>Discover delicious and nutritious alternatives to your favorite unhealthy snacks.</p>
+    <p>Nutritious alternatives from Indian, Mediterranean & Western cuisines.</p>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search healthy options..." />
+      <button id="toggle-theme">🌙 Dark Mode</button>
+    </div>
   </header>
 
   <main id="food-grid"></main>
 
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <span id="close-popup">&times;</span>
+      <h2 id="popup-title"></h2>
+      <p id="popup-unhealthy"></p>
+      <ul id="popup-nutrition"></ul>
+    </div>
+  </div>
+
   <footer>
-    <p>&copy; A project By Mika And Junaid </p>
+    <p>&copy; 2025 Healthy Living. Eat smart, live well.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    const foodData = [
+      // Indian
+      {
+        unhealthy: "Butter Chicken with Naan",
+        healthy: "Grilled Tandoori Chicken with Whole Wheat Roti",
+        image: "https://source.unsplash.com/400x300/?tandoori",
+        nutrition: {
+          Calories: "320",
+          Protein: "35g",
+          Fat: "8g",
+          Carbs: "28g",
+          Fiber: "4g"
+        }
+      },
+      {
+        unhealthy: "Samosa",
+        healthy: "Baked Vegetable Cutlet",
+        image: "https://source.unsplash.com/400x300/?cutlet",
+        nutrition: {
+          Calories: "150",
+          Protein: "5g",
+          Fat: "5g",
+          Carbs: "20g",
+          Fiber: "3g"
+        }
+      },
+
+      // Mediterranean
+      {
+        unhealthy: "Beef Gyro with Sauce",
+        healthy: "Grilled Chicken Pita with Tzatziki",
+        image: "https://source.unsplash.com/400x300/?pita",
+        nutrition: {
+          Calories: "290",
+          Protein: "30g",
+          Fat: "9g",
+          Carbs: "25g",
+          Fiber: "3g"
+        }
+      },
+      {
+        unhealthy: "Baklava",
+        healthy: "Greek Yogurt with Honey and Nuts",
+        image: "https://source.unsplash.com/400x300/?yogurt",
+        nutrition: {
+          Calories: "180",
+          Protein: "10g",
+          Fat: "7g",
+          Carbs: "20g",
+          Fiber: "2g"
+        }
+      },
+
+      // Western
+      {
+        unhealthy: "Cheeseburger",
+        healthy: "Turkey Burger Lettuce Wrap",
+        image: "https://source.unsplash.com/400x300/?turkey-burger",
+        nutrition: {
+          Calories: "250",
+          Protein: "27g",
+          Fat: "10g",
+          Carbs: "8g",
+          Fiber: "2g"
+        }
+      },
+      {
+        unhealthy: "Mac and Cheese",
+        healthy: "Cauliflower Cheese Bake",
+        image: "https://source.unsplash.com/400x300/?cauliflower",
+        nutrition: {
+          Calories: "190",
+          Protein: "12g",
+          Fat: "9g",
+          Carbs: "10g",
+          Fiber: "4g"
+        }
+      }
+    ];
+
+    const grid = document.getElementById('food-grid');
+    const search = document.getElementById('search');
+    const toggle = document.getElementById('toggle-theme');
+    const popup = document.getElementById('popup');
+    const popupTitle = document.getElementById('popup-title');
+    const popupUnhealthy = document.getElementById('popup-unhealthy');
+    const popupNutrition = document.getElementById('popup-nutrition');
+    const closePopup = document.getElementById('close-popup');
+
+    function renderCards(filter = "") {
+      grid.innerHTML = "";
+      foodData
+        .filter(item => item.healthy.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${item.image}" alt="${item.healthy}">
+            <div class="card-content">
+              <h3>${item.healthy}</h3>
+              <p>Swap for <strong>${item.unhealthy}</strong></p>
+            </div>
+          `;
+          card.onclick = () => showPopup(item);
+          grid.appendChild(card);
+        });
+    }
+
+    function showPopup(item) {
+      popupTitle.textContent = item.healthy;
+      popupUnhealthy.textContent = `Instead of: ${item.unhealthy}`;
+      popupNutrition.innerHTML = "";
+      Object.entries(item.nutrition).forEach(([key, value]) => {
+        const li = document.createElement('li');
+        li.textContent = `${key}: ${value}`;
+        popupNutrition.appendChild(li);
+      });
+      popup.classList.add('active');
+    }
+
+    search.addEventListener('input', e => renderCards(e.target.value));
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      toggle.textContent = document.body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+    closePopup.addEventListener('click', () => popup.classList.remove('active'));
+
+    renderCards();
+  </script>
 </body>
 </html>
